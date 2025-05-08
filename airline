@@ -56,12 +56,16 @@ MINUS
  AND E.EID = C.EID);
 
 5Q.e) Print the name and salary of every nonpilot whose salary is more than the average salary for pilots.
-  SELECT EID, ENAME, SALARY 
+SELECT EID, ENAME, SALARY 
 FROM EMPLOYEES 
 WHERE SALARY > (
-  SELECT AVG(SALARY) 
+  SELECT AVG(SALARY)
   FROM EMPLOYEES
-) 
+  WHERE EID IN (
+    SELECT EID
+    FROM CERTIFIED
+  )
+)
 AND EID NOT IN (
   SELECT EID 
   FROM CERTIFIED
