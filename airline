@@ -1,0 +1,68 @@
+FLIGHTS (FLNO: INTEGER, SOURCE: STRING, DESTINATION: STRING, DISTANCE: INTEGER, DEPARTS:TIME, ARRIVES: TIME, PRICE: INTEGER) 
+AIRCRAFT (AID: INTEGER, ANAME: STRING, CRUISINGRANGE: INTEGER) 
+CERTIFIED (EID: INTEGER, AID: INTEGER) 
+EMPLOYEES (EID: INTEGER, ENAME: STRING, SALARY: INTEGER)
+
+Q1.Find the names of aircraft such that all pilots certified to operate them earn more than $80,000.
+SELECT ANAME 
+FROM AIRCRAFT A, EMPLOYEES E, CERTIFIED C 
+WHERE A.AID = C.AID 
+  AND E.EID = C.EID 
+  AND E.SALARY > 80000;
+
+Q2.b) For each pilot who is certified for more than three aircraft, find the eid and the maximum cruisingrange of the aircraft for which she or he is certified.
+  SELECT E.EID, MAX(CRUISINGRANGE) 
+FROM EMPLOYEES E, CERTIFIED C, AIRCRAFT A 
+WHERE E.EID = C.EID 
+  AND A.AID = C.AID 
+GROUP BY E.EID 
+HAVING COUNT(*) > 2;
+
+Q3.c) For all aircraft with cruisingrange over 1000 miles, find the name of the aircraft and the average salary of all pilots certified for this aircraft.
+  SELECT A.ANAME, AVG(SALARY) 
+FROM EMPLOYEES E, CERTIFIED C, AIRCRAFT A 
+WHERE C.EID = E.EID 
+  AND A.AID = C.AID 
+  AND A.CRUISINGRANGE > 1000 
+GROUP BY A.ANAME;
+
+Q4.d) Print the enames of pilots who can operate planes with cruising range greater than 3000 miles but are not certified on any Boeing aircraft.
+  (SELECT ENAME 
+ FROM EMPLOYEES E, CERTIFIED C 
+ WHERE C.AID IN (
+   SELECT A.AID 
+   FROM AIRCRAFT A, CERTIFIED C 
+   WHERE A.AID NOT IN (
+     SELECT AID 
+     FROM AIRCRAFT 
+     WHERE ANAME = 'BOEING' OR CRUISINGRANGE = 3000
+   ) 
+   GROUP BY A.AID
+ ) 
+ AND E.EID = C.EID)
+MINUS
+(SELECT ENAME 
+ FROM EMPLOYEES E, CERTIFIED C 
+ WHERE C.AID IN (
+   SELECT A.AID 
+   FROM AIRCRAFT A, CERTIFIED C 
+   WHERE A.AID IN (
+     SELECT AID 
+     FROM AIRCRAFT 
+     WHERE ANAME = 'BOEING'
+   ) 
+   GROUP BY A.AID
+ ) 
+ AND E.EID = C.EID);
+
+5Q.e) Print the name and salary of every nonpilot whose salary is more than the average salary for pilots.
+  SELECT EID, ENAME, SALARY 
+FROM EMPLOYEES 
+WHERE SALARY > (
+  SELECT AVG(SALARY) 
+  FROM EMPLOYEES
+) 
+AND EID NOT IN (
+  SELECT EID 
+  FROM CERTIFIED
+);
