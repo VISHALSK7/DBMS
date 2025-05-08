@@ -39,14 +39,15 @@ WHERE NOT EXISTS (
 );
 
 Q5.e) For each department that has more than five employees, retrieve the department number and the number of its employees who are making more than Rs. 6,00,000.
-SELECT D.DNO, D.DNAME, E.FNAME, E.LNAME, COUNT(*) AS NOOFEMP 
-FROM EMPLOYEE E, DEPARTMENTS D 
-WHERE E.DNO = D.DNO 
-  AND E.SALARY > 600000 
-  AND D.DNO IN (
-    SELECT E1.DNO 
-    FROM EMPLOYEE E1 
-    GROUP BY E1.DNO 
+SELECT D.DNO, COUNT(*) AS NOOFEMP 
+FROM EMPLOYEE E
+JOIN DEPARTMENTS D ON E.DNO = D.DNO
+WHERE E.SALARY > 600000 
+  AND E.DNO IN (
+    SELECT DNO 
+    FROM EMPLOYEE 
+    GROUP BY DNO 
     HAVING COUNT(*) > 5
-  ) 
-GROUP BY D.DNO, D.DNAME, E.FNAME, E.LNAME;
+  )
+GROUP BY D.DNO;
+
