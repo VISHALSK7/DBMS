@@ -27,33 +27,17 @@ WHERE C.EID = E.EID
 GROUP BY A.ANAME;
 
 Q4.d) Print the enames of pilots who can operate planes with cruising range greater than 3000 miles but are not certified on any Boeing aircraft.
-  (SELECT ENAME 
- FROM EMPLOYEES E, CERTIFIED C 
- WHERE C.AID IN (
-   SELECT A.AID 
-   FROM AIRCRAFT A, CERTIFIED C 
-   WHERE A.AID NOT IN (
-     SELECT AID 
-     FROM AIRCRAFT 
-     WHERE ANAME = 'BOEING' OR CRUISINGRANGE = 3000
-   ) 
-   GROUP BY A.AID
- ) 
- AND E.EID = C.EID)
-MINUS
-(SELECT ENAME 
- FROM EMPLOYEES E, CERTIFIED C 
- WHERE C.AID IN (
-   SELECT A.AID 
-   FROM AIRCRAFT A, CERTIFIED C 
-   WHERE A.AID IN (
-     SELECT AID 
-     FROM AIRCRAFT 
-     WHERE ANAME = 'BOEING'
-   ) 
-   GROUP BY A.AID
- ) 
- AND E.EID = C.EID);
+SELECT DISTINCT E.ENAME
+FROM EMPLOYEES E
+JOIN CERTIFIED C ON E.EID = C.EID
+JOIN AIRCRAFT A ON C.AID = A.AID
+WHERE A.CRUISINGRANGE > 3000
+  AND E.EID NOT IN (
+    SELECT C2.EID
+    FROM CERTIFIED C2
+    JOIN AIRCRAFT A2 ON C2.AID = A2.AID
+    WHERE A2.ANAME = 'BOEING'
+  );
 
 5Q.e) Print the name and salary of every nonpilot whose salary is more than the average salary for pilots.
 SELECT EID, ENAME, SALARY 
